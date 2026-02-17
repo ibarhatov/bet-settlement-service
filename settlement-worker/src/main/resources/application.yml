@@ -1,0 +1,49 @@
+server:
+  port: 8081
+
+app:
+  kafka:
+    topic: event-outcomes
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:bets;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    defer-datasource-initialization: true
+    properties:
+      hibernate:
+        format_sql: true
+  sql:
+    init:
+      mode: always
+  h2:
+    console:
+      enabled: true
+      path: /h2
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: settlement-worker
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    properties:
+      spring.json.trusted.packages: com.ibarhatov.betsettlement.contracts.messaging
+      spring.json.value.default.type: com.ibarhatov.betsettlement.contracts.messaging.EventOutcomeMessage
+      spring.json.use.type.headers: false
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: bet-settlement-worker-producer
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
